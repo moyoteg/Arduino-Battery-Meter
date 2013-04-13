@@ -1,0 +1,177 @@
+//Battery meter
+// battery description: http://www.batteryspace.com/lifepo438120pbattery128v30ah384wh100aratewithpcm.aspx
+// the max value of the voltage is approx 3.9v
+// the discharge time is 59.5 minutes
+// there are 5 LEDs so we will split the battery level into 5 regions
+// voltage values: 3.28,3.2,3.18,3.00
+
+int aReading;
+//int aReading;
+
+//////////voltage ranges////////////////
+//float high,midHigh,mid,midLow,low;
+
+float high = 3.28;
+float midHigh = 3.2;
+float mid = 3.18;
+float low = 3.00;
+float zero = 0;
+////////////////////////////////////////
+
+float Vin1;
+float Vin2;
+float Vin3;
+int c;
+int on = 5;
+int off = 0;
+float actualVValue;
+int brightness = 0;    // how bright the LED is
+int fadeAmount = 5;    // how many points to fade the LED by
+int rate;
+/////////////////////////////////////////
+void setup()
+{
+    pinMode(3, OUTPUT);
+    pinMode(5, OUTPUT);
+    pinMode(6, OUTPUT);
+    pinMode(9, OUTPUT);
+    pinMode(10, OUTPUT);
+    pinMode(11, OUTPUT);
+    
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  aReading = analogRead(0);
+
+  //Using a "default" 4v value
+  Vin1 = (4.00/1024) * aReading;
+  //Using the measured supply voltage
+  Vin2 = (3.90/1024) * aReading;
+  
+  actualVValue = Vin2;//
+  
+  //Serial.print("Reading = ");
+ // Serial.print(aReading);
+//  Serial.print("\t4.00 = ");
+//  Serial.print(Vin1);
+//  Serial.print("\t3.90 = ");
+//  Serial.println(Vin2);
+  Serial.print("\n\nVoltage reading = ");
+  Serial.println(actualVValue);
+//  Serial.print(" v");
+//    analogWrite(9,on);
+
+// max battery value 5 LED
+  if(actualVValue > high)
+  {
+    rate = 200;
+//    analogWrite(3,on);
+//    analogWrite(5,on);
+//    analogWrite(6,on);
+//    analogWrite(9,on);
+//    analogWrite(10,on);
+//////////////////////////////////////////
+    analogWrite(3,off);
+    analogWrite(5,off);
+    analogWrite(6,off);
+    analogWrite(9,off);
+    //analogWrite(10,off);
+    delay(15);
+////////////////////////////////////////////
+    analogWrite(10,brightness);
+    delay(100);
+    analogWrite(9,brightness);
+    delay(50);
+    analogWrite(6,brightness);
+    delay(50);
+    analogWrite(5,brightness);
+    delay(50);
+    analogWrite(3,brightness);
+    Serial.println("5 LEDs ON");
+    Serial.print("minimum battery remaining = 37.5 minutes ");
+    
+  }
+  
+// mid-high battery value 4 LED
+  else if(actualVValue <= high && actualVValue > midHigh)
+  {
+    rate = 150;
+    analogWrite(3,off);
+//    analogWrite(5,on);
+//    analogWrite(6,on);
+//    analogWrite(9,on);
+//    analogWrite(10,on);
+    analogWrite(5,brightness);
+    analogWrite(6,brightness);
+    analogWrite(9,brightness);
+    analogWrite(10,brightness);
+    Serial.println("4 LEDs ON");
+    Serial.print("minimum battery remaining = 26.5 minutes ");
+  }
+
+// mid battery value 3 LED
+  else if(actualVValue <= midHigh && actualVValue > mid)
+  {
+    rate = 100;
+    analogWrite(3,off);
+    analogWrite(5,off);
+//    analogWrite(6,on);
+//    analogWrite(9,on);
+//    analogWrite(10,on);
+    analogWrite(6,brightness);
+    analogWrite(9,brightness);
+    analogWrite(10,brightness);
+    Serial.println("3 LEDs ON");
+    Serial.print("minimum battery remaining = 15.5 minutes ");
+  }
+
+// mid-low value 2 LED
+  else if(actualVValue <= mid && actualVValue > low)
+  {
+    rate = 50;
+    analogWrite(3,off);
+    analogWrite(5,off);
+    analogWrite(6,off);
+ //   analogWrite(9,on);
+ //   analogWrite(10,on);
+    analogWrite(9,brightness);
+    analogWrite(10,brightness);
+    Serial.println("2 LEDs ON");
+    Serial.print("minimum effective battery remaining = 4.5 minutes \n");
+  }
+  
+ // low value 1 LED
+  else if(actualVValue <= low && actualVValue >= zero)
+  {
+    rate = 25;
+    analogWrite(3,off);
+    analogWrite(5,off);
+    analogWrite(6,off);
+    analogWrite(9,off);
+    analogWrite(10,brightness);
+    
+    Serial.println("1 LED ON");
+    Serial.println("***WARNING*** = Battery running LOW");
+  }
+  
+  analogWrite(11, brightness);
+  
+  // change the brightness for next time through the loop:
+  brightness = brightness + fadeAmount;
+      Serial.println("\nBrightness");
+    Serial.println(brightness);
+// reset the brightness value so that it does not get past the limit
+  if(brightness > 200)
+  {
+    brightness = 5;
+  }
+    // reverse the direction of the fading at the ends of the fade: 
+  if (brightness == 0 || brightness == rate) {
+    fadeAmount = -fadeAmount ; 
+  }    
+  delay(5);
+  
+  
+}
